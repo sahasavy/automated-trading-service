@@ -1,4 +1,4 @@
-package invest.automate.trading.service;
+package invest.automate.trade.service;
 
 import org.springframework.stereotype.Service;
 import org.ta4j.core.*;
