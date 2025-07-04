@@ -1,11 +1,9 @@
-package invest.automate.trade.service;
+package invest.automate.trade.backtest;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerodhatech.models.Tick;
 import invest.automate.trade.config.BacktestConfig;
 import invest.automate.trade.config.IndicatorConfig;
-import invest.automate.trade.model.requests.BacktestRequest;
+import invest.automate.trade.service.SeriesManagerService;
 import invest.automate.trade.service.indicator.IndicatorService;
 import invest.automate.trade.service.ml.MlModelService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.ta4j.core.BarSeries;
 
-import java.io.File;
 import java.util.List;
 
 @Slf4j
@@ -21,25 +18,35 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BacktestService {
 
+    private final JsonFileHistoricDataProvider jsonProvider;
+    private final CsvFileHistoricDataProvider csvProvider;
+    private final ApiHistoricDataProvider apiProvider;
+
     private final BacktestConfig backtestConfig;
     private final IndicatorConfig indicatorConfig;
-    private final SeriesManagerService seriesManager;
+
+    private final SeriesManagerService seriesManagerService;
     private final IndicatorService indicatorService;
     private final MlModelService mlModelService;
 
-    public BacktestResult runBacktest(BacktestRequest request) {
+    public BacktestResult runBacktest() {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            File jsonFile = new File(backtestConfig.getHistoricFilePath());
-            List<Tick> ticks = mapper.readValue(jsonFile, new TypeReference<>() {
-            });
+            HistoricDataProvider historicDataProvider = switch (backtestConfig.getProvider().toLowerCase()) {
+                case "json" -> jsonProvider;
+                case "csv" -> csvProvider;
+                case "api" -> apiProvider;
+                default -> throw new IllegalStateException("Unexpected Provider value: " +
+                        backtestConfig.getProvider().toLowerCase());
+            };
+
+            List<Tick> ticks = historicDataProvider.loadHistoricTicks();
             int trainLimit = ticks.size() * 2 / 3;
 
             // 1. TRAIN ML model on first 2/3 of data
             for (int i = 0; i < trainLimit; i++) {
-                seriesManager.onTicks(List.of(ticks.get(i)));
+                seriesManagerService.onTicks(List.of(ticks.get(i)));
             }
-            BarSeries barSeries = seriesManager.getSeries(ticks.getFirst().getInstrumentToken(),
+            BarSeries barSeries = seriesManagerService.getSeries(ticks.getFirst().getInstrumentToken(),
                     indicatorConfig.getBarDurations().getFirst());
             if (barSeries.getBarCount() > 20) {
                 mlModelService.trainModel(barSeries);
@@ -50,8 +57,8 @@ public class BacktestService {
             double pnl = 0;
             for (int limit = trainLimit; limit < ticks.size(); limit++) {
                 Tick tick = ticks.get(limit);
-                seriesManager.onTicks(List.of(tick));
-                BarSeries series = seriesManager.getSeries(tick.getInstrumentToken(),
+                seriesManagerService.onTicks(List.of(tick));
+                BarSeries series = seriesManagerService.getSeries(tick.getInstrumentToken(),
                         indicatorConfig.getBarDurations().getFirst());
                 if (series.getBarCount() < 21) {
                     continue;
