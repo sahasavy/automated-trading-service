@@ -1,4 +1,4 @@
-package invest.automate.trade.service;
+package invest.automate.trade.service.broker;
 
 import com.zerodhatech.kiteconnect.KiteConnect;
 import jakarta.annotation.PostConstruct;

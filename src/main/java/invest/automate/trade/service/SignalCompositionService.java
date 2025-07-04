@@ -1,5 +1,7 @@
 package invest.automate.trade.service;
 
+import invest.automate.trade.service.indicator.IndicatorService;
+import invest.automate.trade.service.ml.MlModelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.ta4j.core.BarSeries;

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerodhatech.models.Tick;
 import invest.automate.trade.config.TradingConfig;
+import invest.automate.trade.service.indicator.IndicatorService;
+import invest.automate.trade.service.ml.MlModelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
