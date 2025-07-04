@@ -47,9 +47,9 @@ public class WebSocketTickService {
         kiteTicker.setOnErrorListener(handleErrors());
 
         try {
-            kiteTicker.setTryReconnection(zerodhaConfig.isZerodhaTickerTryReconnection());            // Call before calling connect().
-            kiteTicker.setMaximumRetries(zerodhaConfig.getZerodhaTickerMaxRetries());                 // Should be greater than 0
-            kiteTicker.setMaximumRetryInterval(zerodhaConfig.getZerodhaTickerMaxRetryIntervalSec());  // Unit is seconds
+            kiteTicker.setTryReconnection(zerodhaConfig.isTickerTryReconnection());            // Call before calling connect().
+            kiteTicker.setMaximumRetries(zerodhaConfig.getTickerMaxRetries());                 // Should be greater than 0
+            kiteTicker.setMaximumRetryInterval(zerodhaConfig.getTickerMaxRetryIntervalSec());  // Unit is seconds
         } catch (KiteException e) {
             log.error("Kite Ticker Exception occurred", e);
             throw new RuntimeException(e);

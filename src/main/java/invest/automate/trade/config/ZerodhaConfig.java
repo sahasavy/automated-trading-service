@@ -10,30 +10,16 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class ZerodhaConfig {
 
-    @Value("${account.user-id}")
-    private String zerodhaAccountUserId;
+    private String accountUserId;
 
-    @Value("${kite.api-key}")
-    private String zerodhaKiteApiKey;
+    private String kiteApiKey;
+    private String kiteApiSecret;
+    private String kiteRequestToken;
+    private String kiteAccessToken;
+    private String kitePublicToken;
 
-    @Value("${kite.api-secret}")
-    private String zerodhaKiteApiSecret;
+    private boolean tickerTryReconnection;
+    private int tickerMaxRetries;
+    private int tickerMaxRetryIntervalSec;
 
-    @Value("${kite.request-token}")
-    private String zerodhaKiteRequestToken;
-
-    @Value("${kite.access-token}")
-    private String zerodhaKiteAccessToken;
-
-    @Value("${kite.public-token}")
-    private String zerodhaKitePublicToken;
-
-    @Value("${ticker.try-reconnection}")
-    private boolean zerodhaTickerTryReconnection;
-
-    @Value("${ticker.max-retries}")
-    private int zerodhaTickerMaxRetries;
-
-    @Value("${ticker.max-retry-interval-sec}")
-    private int zerodhaTickerMaxRetryIntervalSec;
 }

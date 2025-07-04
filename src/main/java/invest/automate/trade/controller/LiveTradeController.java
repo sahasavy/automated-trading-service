@@ -7,19 +7,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/live")
 @RequiredArgsConstructor
 public class LiveTradeController {
 
     private final LiveTradeService liveTradeService;
 
-    @PostMapping("/live/start")
+    @PostMapping("/start")
     public ResponseEntity<?> startLiveTrading(@RequestBody(required = false) LiveTradeRequest request) {
         liveTradeService.startLiveTrading(request);
         return ResponseEntity.ok("Live trading started");
     }
 
-    @PostMapping("/live/stop")
+    @PostMapping("/stop")
     public ResponseEntity<?> stopLiveTrading() {
         liveTradeService.stopLiveTrading();
         return ResponseEntity.ok("Live trading stopped");
