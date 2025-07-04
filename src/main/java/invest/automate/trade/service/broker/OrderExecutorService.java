@@ -1,6 +1,5 @@
 package invest.automate.trade.service.broker;
 
-import com.zerodhatech.kiteconnect.KiteConnect;
 import com.zerodhatech.kiteconnect.kitehttp.exceptions.KiteException;
 import com.zerodhatech.kiteconnect.utils.Constants;
 import com.zerodhatech.models.OrderParams;
@@ -15,7 +14,7 @@ import invest.automate.trade.config.TradingConfig;
 public class OrderExecutorService {
 
     private final TradingConfig config;
-    private final KiteConnect kiteConnect;
+    private final ZerodhaKiteService zerodhaKiteService;
 
     public void executeOrder(String action, double price, long token, boolean liveMode) {
         int quantity = config.getDefaultOrderQuantity();
@@ -38,7 +37,7 @@ public class OrderExecutorService {
             params.product = product;
             params.orderType = Constants.ORDER_TYPE_MARKET;
             params.validity = Constants.VALIDITY_DAY;
-            String orderId = kiteConnect.placeOrder(params, variety).toString();
+            String orderId = zerodhaKiteService.getKiteConnect().placeOrder(params, variety).toString();
             log.info("[LIVE ORDER] {} placed: orderId={}", action, orderId);
         } catch (Exception | KiteException e) {
             log.error("[ORDER ERROR] Could not place live order: {}", e.getMessage(), e);
@@ -47,7 +46,9 @@ public class OrderExecutorService {
 
     private String getTradingSymbolForToken(long token, String exchange) throws Exception, KiteException {
         // TODO - Need to cache this for efficiency
-        return kiteConnect.getInstruments(exchange).stream()
+        return zerodhaKiteService.getKiteConnect()
+                .getInstruments(exchange)
+                .stream()
                 .filter(instr -> instr.instrument_token == token)
                 .findFirst()
                 .orElseThrow(() -> new Exception("Instrument token not found: " + token))

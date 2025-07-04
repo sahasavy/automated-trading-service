@@ -6,14 +6,14 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import invest.automate.trade.config.TradingConfig;
+import invest.automate.trade.config.ZerodhaConfig;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ZerodhaKiteService {
 
-    private final TradingConfig config;
+    private final ZerodhaConfig config;
 
     @Getter
     private KiteConnect kiteConnect;
