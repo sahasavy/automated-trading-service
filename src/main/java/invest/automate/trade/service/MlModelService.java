@@ -17,13 +17,13 @@ import java.util.Arrays;
 
 @Slf4j
 @Service
-public class WekaModelService {
+public class MlModelService {
 
     private Classifier model;
     private Instances dataFormat;
 
     /**
-     * Train the model from a list of prices (or features); this is a simple illustration.
+     * Train the model from a list of prices (or features)
      */
     public void trainModel(BarSeries series) throws Exception {
         // Attributes: [price, rsi], Class: [UP, DOWN]
@@ -41,12 +41,14 @@ public class WekaModelService {
         for (int i = 1; i < series.getBarCount() - 1; i++) {
             double price = close.getValue(i).doubleValue();
             double rsiVal = rsi.getValue(i).doubleValue();
-            double nextPrice = close.getValue(i+1).doubleValue();
+            double nextPrice = close.getValue(i + 1).doubleValue();
             String direction = nextPrice > price ? "UP" : "DOWN";
+
             Instance instance = new DenseInstance(3);
             instance.setValue(attrs.get(0), price);
             instance.setValue(attrs.get(1), rsiVal);
             instance.setValue(attrs.get(2), direction);
+
             dataset.add(instance);
         }
 
@@ -60,17 +62,23 @@ public class WekaModelService {
      * Predict using current tick features (returns "UP" or "DOWN").
      */
     public String predict(BarSeries series) throws Exception {
-        if (model == null || dataFormat == null || series.getBarCount() < 15) return "NONE";
+        if (model == null || dataFormat == null || series.getBarCount() < 15) {
+            return "NONE";
+        }
+
         ClosePriceIndicator close = new ClosePriceIndicator(series);
         RSIIndicator rsi = new RSIIndicator(close, 14);
         int i = series.getEndIndex();
         double price = close.getValue(i).doubleValue();
         double rsiVal = rsi.getValue(i).doubleValue();
+
         Instance instance = new DenseInstance(3);
         instance.setValue(dataFormat.attribute(0), price);
         instance.setValue(dataFormat.attribute(1), rsiVal);
         instance.setDataset(dataFormat);
-        double predIndex = model.classifyInstance(instance);
-        return dataFormat.classAttribute().value((int) predIndex);
+
+        double predictionIndex = model.classifyInstance(instance);
+        return dataFormat.classAttribute()
+                .value((int) predictionIndex);
     }
 }

@@ -32,21 +32,29 @@ public class LiveTradeService {
         running.set(true);
 
         wsService.addTickListener(ticks -> {
-            if (!running.get()) return;
+            if (!running.get()) {
+                return;
+            }
+
             for (Tick tick : ticks) {
                 seriesManager.onTicks(List.of(tick));
+
                 for (int barDuration : config.getBarDurations()) {
-                    BarSeries series = seriesManager.getSeries(tick.instrumentToken, barDuration);
+                    BarSeries series = seriesManager.getSeries(tick.getInstrumentToken(), barDuration);
                     SignalCompositionService.Signal signal = signalCompositionService.compositeSignal(series);
+
                     if (signal == SignalCompositionService.Signal.BUY) {
-                        orderExecutorService.executeOrder("BUY", tick.lastTradedPrice, tick.instrumentToken, true); // LIVE
+                        orderExecutorService.executeOrder("BUY", tick.getLastTradedPrice(),
+                                tick.getInstrumentToken(), true);
                     }
                     if (signal == SignalCompositionService.Signal.SELL) {
-                        orderExecutorService.executeOrder("SELL", tick.lastTradedPrice, tick.instrumentToken, true); // LIVE
+                        orderExecutorService.executeOrder("SELL", tick.getLastTradedPrice(),
+                                tick.getInstrumentToken(), true);
                     }
                 }
             }
         });
+
         wsService.startWebSocket();
         log.info("Live trading started.");
     }

@@ -9,24 +9,36 @@ import org.ta4j.core.BarSeries;
 public class SignalCompositionService {
 
     private final IndicatorService indicatorService;
-    private final WekaModelService wekaModelService;
+    private final MlModelService mlModelService;
 
-    public enum Signal {BUY, SELL, NONE}
+    public enum Signal {
+        BUY,
+        SELL,
+        NONE
+    }
 
     public Signal compositeSignal(BarSeries series) {
-        // TA4J indicator logic
-        IndicatorService.Signal ta4j = indicatorService.evaluateEmaCrossover(series);
-        // ML logic
-        String ml = "NONE";
+        IndicatorService.Signal indicatorSignal = indicatorService.evaluateEmaCrossover(series);
+
+        String mlSignal = "NONE";
         try {
-            ml = wekaModelService.predict(series);
+            mlSignal = mlModelService.predict(series);
         } catch (Exception ignored) {
         }
+
         // Voting logic
-        if (ta4j == IndicatorService.Signal.BUY && "UP".equals(ml)) return Signal.BUY;
-        if (ta4j == IndicatorService.Signal.SELL && "DOWN".equals(ml)) return Signal.SELL;
-        if (ta4j == IndicatorService.Signal.BUY || "UP".equals(ml)) return Signal.BUY; // looser: either says BUY
-        if (ta4j == IndicatorService.Signal.SELL || "DOWN".equals(ml)) return Signal.SELL;
+        if (indicatorSignal == IndicatorService.Signal.BUY && "UP".equals(mlSignal)) {
+            return Signal.BUY;
+        }
+        if (indicatorSignal == IndicatorService.Signal.SELL && "DOWN".equals(mlSignal)) {
+            return Signal.SELL;
+        }
+        if (indicatorSignal == IndicatorService.Signal.BUY || "UP".equals(mlSignal)) {
+            return Signal.BUY; // NOTE: looser: either says BUY
+        }
+        if (indicatorSignal == IndicatorService.Signal.SELL || "DOWN".equals(mlSignal)) {
+            return Signal.SELL;
+        }
         return Signal.NONE;
     }
 }

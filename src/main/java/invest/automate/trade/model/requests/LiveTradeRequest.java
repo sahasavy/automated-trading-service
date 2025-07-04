@@ -4,5 +4,4 @@ import lombok.Data;
 
 @Data
 public class LiveTradeRequest {
-    // Any custom params for live trading
 }

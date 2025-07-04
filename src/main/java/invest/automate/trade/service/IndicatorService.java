@@ -14,21 +14,33 @@ import org.ta4j.core.BaseStrategy;
 @Service
 public class IndicatorService {
 
-    public enum Signal {BUY, SELL, NONE}
+    public enum Signal {
+        BUY,
+        SELL,
+        NONE
+    }
 
-    // Example: EMA crossover
     public Signal evaluateEmaCrossover(BarSeries series) {
-        if (series == null || series.getBarCount() < 22) return Signal.NONE;
+        if (series == null || series.getBarCount() < 22) {
+            return Signal.NONE;
+        }
+
         ClosePriceIndicator close = new ClosePriceIndicator(series);
         EMAIndicator shortEma = new EMAIndicator(close, 9);
         EMAIndicator longEma = new EMAIndicator(close, 21);
-        Strategy strat = new BaseStrategy(
+
+        Strategy strategy = new BaseStrategy(
                 new CrossedUpIndicatorRule(shortEma, longEma),
                 new CrossedDownIndicatorRule(shortEma, longEma)
         );
+
         int end = series.getEndIndex();
-        if (strat.shouldEnter(end)) return Signal.BUY;
-        if (strat.shouldExit(end)) return Signal.SELL;
+        if (strategy.shouldEnter(end)) {
+            return Signal.BUY;
+        }
+        if (strategy.shouldExit(end)) {
+            return Signal.SELL;
+        }
         return Signal.NONE;
     }
 }
