@@ -10,7 +10,7 @@ trading:
   api-key: "YOUR_KITE_API_KEY"
   api-secret: "YOUR_KITE_API_SECRET"
   access-token: "YOUR_KITE_ACCESS_TOKEN"
-  instrument-tokens: [ 256265, 738561 ]   # List of tokens you want to trade
+  instrument-tokens: [ 256265, 738561 ]   # List of tokens trade
   bar-durations: [ 1, 3, 5 ]              # Bar sizes in seconds (for multiple resolutions)
   weka-model: "RandomForest"            # Could be RandomForest, J48, etc.
   #  historic-file-path: "src/main/resources/historical_data.csv"

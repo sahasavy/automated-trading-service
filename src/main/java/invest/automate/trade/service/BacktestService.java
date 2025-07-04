@@ -20,45 +20,61 @@ public class BacktestService {
     private final TradingConfig config;
     private final SeriesManagerService seriesManager;
     private final IndicatorService indicatorService;
-    private final WekaModelService wekaModelService;
+    private final MlModelService mlModelService;
 
     public BacktestResult runBacktest(Object request) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             File jsonFile = new File(config.getHistoricFilePath());
-            List<Tick> ticks = mapper.readValue(jsonFile, new TypeReference<List<Tick>>() {
+            List<Tick> ticks = mapper.readValue(jsonFile, new TypeReference<>() {
             });
             int trainLimit = ticks.size() * 2 / 3;
 
             // 1. TRAIN ML model on first 2/3 of data
-            for (int i = 0; i < trainLimit; i++)
+            for (int i = 0; i < trainLimit; i++) {
                 seriesManager.onTicks(List.of(ticks.get(i)));
-            BarSeries barSeries = seriesManager.getSeries(ticks.get(0).instrumentToken, config.getBarDurations().get(0));
-            if (barSeries.getBarCount() > 20)
-                wekaModelService.trainModel(barSeries);
+            }
+            BarSeries barSeries = seriesManager.getSeries(ticks.getFirst().getInstrumentToken(),
+                    config.getBarDurations().getFirst());
+            if (barSeries.getBarCount() > 20) {
+                mlModelService.trainModel(barSeries);
+            }
 
-            // 2. TEST signals + ML prediction on rest
+            // 2. TEST signals + ML prediction on remaining 1/3 data
             int buySignals = 0, mlUp = 0;
             double pnl = 0;
-            for (int i = trainLimit; i < ticks.size(); i++) {
-                Tick tick = ticks.get(i);
+            for (int limit = trainLimit; limit < ticks.size(); limit++) {
+                Tick tick = ticks.get(limit);
                 seriesManager.onTicks(List.of(tick));
-                BarSeries series = seriesManager.getSeries(tick.instrumentToken, config.getBarDurations().get(0));
-                if (series.getBarCount() < 21) continue;
-                var ta4jSignal = indicatorService.evaluateEmaCrossover(series);
+                BarSeries series = seriesManager.getSeries(tick.getInstrumentToken(),
+                        config.getBarDurations().getFirst());
+                if (series.getBarCount() < 21) {
+                    continue;
+                }
+
+                IndicatorService.Signal indicatorSignal = indicatorService.evaluateEmaCrossover(series);
                 String mlSignal = "NONE";
-                if (wekaModelService != null && barSeries.getBarCount() > 15)
-                    mlSignal = wekaModelService.predict(series);
-                if (ta4jSignal == IndicatorService.Signal.BUY) buySignals++;
-                if ("UP".equals(mlSignal)) mlUp++;
+                if (mlModelService != null && barSeries.getBarCount() > 15) {
+                    mlSignal = mlModelService.predict(series);
+                }
+
+                if (indicatorSignal == IndicatorService.Signal.BUY) {
+                    buySignals++;
+                }
+
+                if ("UP".equals(mlSignal)) {
+                    mlUp++;
+                }
+
                 // Example: count as correct if ML/indicator says "UP" and next tick price goes up
-                if (i + 1 < ticks.size() && ("UP".equals(mlSignal) || ta4jSignal == IndicatorService.Signal.BUY)) {
-                    double cur = tick.lastTradedPrice;
-                    double next = ticks.get(i + 1).lastTradedPrice;
+                if (limit + 1 < ticks.size() && ("UP".equals(mlSignal) ||
+                        indicatorSignal == IndicatorService.Signal.BUY)) {
+                    double cur = tick.getLastTradedPrice();
+                    double next = ticks.get(limit + 1).getLastTradedPrice();
                     pnl += (next - cur);
                 }
             }
-            String summary = "Backtest: TA4J Buys=" + buySignals + ", ML UPs=" + mlUp + ", Simulated P&L=" + pnl;
+            String summary = "Backtest: INDICATOR Buys=" + buySignals + ", ML UPs=" + mlUp + ", Simulated P&L=" + pnl;
             log.info(summary);
             return new BacktestResult(summary);
         } catch (Exception e) {

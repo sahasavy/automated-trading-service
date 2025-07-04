@@ -22,12 +22,9 @@ public class ZerodhaKiteService {
     public void init() {
         kiteConnect = new KiteConnect(config.getApiKey());
         // Interactive login required to generate requestToken and accessToken:
-        // See Zerodha docs: https://kite.trade/docs/connect/v3/user/#login-flow
-        // For production, you may automate this using a headless browser or manual prompt.
         try {
             log.info("KiteConnect API loaded. Please ensure accessToken is set in config or via login flow.");
-            // You can set accessToken if available:
-            // kiteConnect.setAccessToken("your_access_token");
+            kiteConnect.setAccessToken(config.getAccessToken());
         } catch (Exception e) {
             log.error("Failed to initialize KiteConnect: {}", e.getMessage(), e);
         }

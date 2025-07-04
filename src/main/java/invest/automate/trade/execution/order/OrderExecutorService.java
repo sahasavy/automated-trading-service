@@ -15,7 +15,7 @@ import invest.automate.trade.config.TradingConfig;
 public class OrderExecutorService {
 
     private final TradingConfig config;
-    private final KiteConnect kiteConnect; // inject via ZerodhaKiteService in your service layer
+    private final KiteConnect kiteConnect;
 
     public void executeOrder(String action, double price, long token, boolean liveMode) {
         int quantity = config.getDefaultOrderQuantity();
@@ -46,7 +46,7 @@ public class OrderExecutorService {
     }
 
     private String getTradingSymbolForToken(long token, String exchange) throws Exception, KiteException {
-        // Best to cache this for efficiency
+        // TODO - Need to cache this for efficiency
         return kiteConnect.getInstruments(exchange).stream()
                 .filter(instr -> instr.instrument_token == token)
                 .findFirst()
