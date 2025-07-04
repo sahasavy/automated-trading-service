@@ -1,0 +1,11 @@
+server:
+  port: 8092
+  servlet:
+    context-path: /trading-service
+
+trading:
+  api-key: "<your-api-key>"
+  api-secret: "<your-api-secret>"
+  instrument-tokens:
+    - 256265
+    - 738561

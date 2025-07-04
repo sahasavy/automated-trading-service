@@ -38,15 +38,15 @@ server.servlet.context-path=/trading-service
 
 ### 📦 Modules
 
-- `model`: Data classes for tick, signal, etc.
-- `strategy`: Core strategies and base interfaces
-- `signal`: Signal generation and dispatch
+- `backtest`: Tick simulator and backtesting
+- `config`: Constants and settings
+- `controller`: REST APIs
+- `exception`: Global error handling
 - `execution.order`: Order placing logic
 - `marketdata.websocket`: Real-time data connector
-- `backtest`: Tick simulator and backtesting
-- `controller`: REST APIs
-- `config`: Constants and settings
-- `exception`: Global error handling
+- `model`: Data classes for tick, signal, etc.
+- `signal`: Signal generation and dispatch
+- `strategy`: Core strategies and base interfaces
 
 ---
 
@@ -54,49 +54,56 @@ server.servlet.context-path=/trading-service
 
 ```bash
 automated-trading-service/
-├── README.md
 ├── build.gradle
+├── README.md
 ├── settings.gradle
 ├── src/
 │   ├── main/
 │   │   ├── java/invest/automate/trade/
+│   │   │   ├── AutomatedTradingServiceApplication.java
+│   │   │   ├── backtest/
+│   │   │   │   ├── BacktestEngine.java
+│   │   │   │   └── TickSimulator.java
+│   │   │   ├── config/
+│   │   │   │   ├── AppConstants.java
+│   │   │   │   └── ZerodhaConfig.java
+│   │   │   ├── controller/
+│   │   │   │   └── StrategyController.java
+│   │   │   ├── exception/
+│   │   │   │   ├── GlobalExceptionHandler.java
+│   │   │   │   └── TradingServiceException.java
+│   │   │   ├── execution/order/
+│   │   │   │   ├── OrderExecutor.java
+│   │   │   │   └── ZerodhaOrderExecutor.java
+│   │   │   ├── marketdata/websocket/
+│   │   │   │   └── ZerodhaWebSocketClient.java
 │   │   │   ├── model/
 │   │   │   │   ├── Tick.java
 │   │   │   │   ├── SignalType.java
-│   │   │   │   ├── OrderType.java
+│   │   │   │   └── OrderType.java
 │   │   │   ├── signal/
 │   │   │   │   ├── Signal.java
-│   │   │   │   ├── SignalDispatcher.java
+│   │   │   │   └── SignalDispatcher.java
 │   │   │   ├── strategy/
 │   │   │   │   ├── StrategyManager.java
 │   │   │   │   ├── base/
 │   │   │   │   │   ├── Strategy.java
 │   │   │   │   │   └── StrategyConfig.java
 │   │   │   │   └── impl/
-│   │   │   │       └── MovingAverageCrossoverStrategy.java
-│   │   │   ├── execution/order/
-│   │   │   │   ├── OrderExecutor.java
-│   │   │   │   └── ZerodhaOrderExecutor.java
-│   │   │   ├── marketdata/websocket/
-│   │   │   │   └── ZerodhaWebSocketClient.java
-│   │   │   ├── backtest/
-│   │   │   │   ├── TickSimulator.java
-│   │   │   │   └── BacktestEngine.java
-│   │   │   ├── controller/
-│   │   │   │   └── StrategyController.java
-│   │   │   ├── exception/
-│   │   │   │   ├── GlobalExceptionHandler.java
-│   │   │   │   └── TradingServiceException.java
-│   │   │   └── config/
-│   │   │       └── AppConstants.java
+│   │   │   │       ├── MovingAverageCrossoverStrategy.java
+│   │   │   │       ├── MeanReversionStrategy.java
+│   │   │   │       └── MomentumStrategy.java
 │   │   └── resources/
-│   │       ├── application.properties
+│   │       └── application.properties
 │   └── test/
 │       ├── java/invest/automate/trade/
+│       │   ├── AutomatedTradingServiceApplicationTest.java
 │       │   ├── controller/
 │       │   │   └── StrategyControllerTest.java
 │       │   ├── strategy/
-│       │   │   └── MovingAverageCrossoverStrategyTest.java
+│       │   │   ├── MovingAverageCrossoverStrategyTest.java
+│       │   │   ├── MeanReversionStrategyTest.java
+│       │   │   └── MomentumStrategyTest.java
 │       │   └── test/
 │       │       ├── TickSimulatorTest.java
 │       │       └── BacktestEngineTest.java
