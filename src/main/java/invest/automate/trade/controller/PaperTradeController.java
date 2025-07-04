@@ -7,19 +7,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/paper")
 @RequiredArgsConstructor
 public class PaperTradeController {
 
     private final PaperTradeService paperTradeService;
 
-    @PostMapping("/paper/start")
+    @PostMapping("/start")
     public ResponseEntity<?> startPaperTrading(@RequestBody(required = false) PaperTradeRequest request) {
         paperTradeService.startPaperTrading(request);
         return ResponseEntity.ok("Paper trading started");
     }
 
-    @PostMapping("/paper/stop")
+    @PostMapping("/stop")
     public ResponseEntity<?> stopPaperTrading() {
         paperTradeService.stopPaperTrading();
         return ResponseEntity.ok("Paper trading stopped");

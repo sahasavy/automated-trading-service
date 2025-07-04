@@ -7,13 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/backtest")
 @RequiredArgsConstructor
 public class BacktestController {
 
     private final BacktestService backtestService;
 
-    @PostMapping("/backtest")
+    @PostMapping("/start")
     public ResponseEntity<?> runBacktest(@RequestBody(required = false) BacktestRequest request) {
         var result = backtestService.runBacktest(request);
         return ResponseEntity.ok(result);

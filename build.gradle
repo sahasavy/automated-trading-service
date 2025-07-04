@@ -15,9 +15,12 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
     implementation 'com.zerodhatech.kiteconnect:kiteconnect:3.5.0'
     implementation 'org.ta4j:ta4j-core:0.18'
     implementation 'nz.ac.waikato.cms.weka:weka-stable:3.8.6'
+    implementation "org.apache.commons:commons-lang3:3.17.0"
+
     compileOnly 'org.projectlombok:lombok:1.18.38'
     annotationProcessor 'org.projectlombok:lombok:1.18.38'
 
