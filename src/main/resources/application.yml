@@ -11,9 +11,13 @@ trading:
   instrument-tokens: [ 256265, 738561 ]   # List of tokens trade
   profile:
     backtest:
-      file-type: json                       # Ex: json, csv, etc.
-      historic-file-path: "src/main/resources/sample_ticks.json"
-      #  historic-file-path: "src/main/resources/historical_data.csv"
+      provider: "json"                      # Ex: "json" or "csv" or "api"
+      json-path: "src/main/resources/sample_ticks.json"
+      csv-path: "src/main/resources/historical_data.csv"
+      api-instrument-token: 123456
+      api-interval: "minute"                # Ex: "minute", "5minute"
+      api-from: "2024-06-01"
+      api-to: "2024-06-30"
     paper:
       paper-trade: true                     # Set false for live trading
     live:
