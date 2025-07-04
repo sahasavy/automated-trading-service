@@ -3,26 +3,28 @@ package invest.automate.trade.service.broker;
 import com.zerodhatech.kiteconnect.kitehttp.exceptions.KiteException;
 import com.zerodhatech.kiteconnect.utils.Constants;
 import com.zerodhatech.models.OrderParams;
+import invest.automate.trade.config.LiveConfig;
+import invest.automate.trade.config.PaperConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import invest.automate.trade.config.TradingConfig;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderExecutorService {
 
-    private final TradingConfig config;
+    private final PaperConfig paperConfig;
+    private final LiveConfig liveConfig;
     private final ZerodhaKiteService zerodhaKiteService;
 
     public void executeOrder(String action, double price, long token, boolean liveMode) {
-        int quantity = config.getDefaultOrderQuantity();
-        String product = config.getTradeProduct();
-        String exchange = config.getTradeExchange();
+        int quantity = liveConfig.getDefaultOrderQuantity();
+        String product = liveConfig.getTradeProduct();
+        String exchange = liveConfig.getTradeExchange();
         String variety = Constants.VARIETY_REGULAR;
 
-        if (!liveMode || config.isPaperTrade()) {
+        if (!liveMode || paperConfig.isPaperTrade()) {
             log.info("[PAPER ORDER] {} {} of token {} at price {}", action, quantity, token, price);
             return;
         }

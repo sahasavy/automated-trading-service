@@ -9,12 +9,17 @@ logging:
 
 trading:
   instrument-tokens: [ 256265, 738561 ]   # List of tokens trade
-  #  historic-file-path: "src/main/resources/historical_data.csv"
-  historic-file-path: "src/main/resources/sample_ticks.json"
-  default-order-quantity: 1             # How many units/contracts per trade
-  trade-product: "MIS"                  # Ex: MIS, CNC, NRML, etc.
-  trade-exchange: "NSE"                 # Ex: NSE, BSE, etc.
-  paper-trade: true                     # Set false for live trading
+  profile:
+    backtest:
+      file-type: json                       # Ex: json, csv, etc.
+      historic-file-path: "src/main/resources/sample_ticks.json"
+      #  historic-file-path: "src/main/resources/historical_data.csv"
+    paper:
+      paper-trade: true                     # Set false for live trading
+    live:
+      default-order-quantity: 1             # How many units/contracts per trade
+      trade-product: "MIS"                  # Ex: MIS, CNC, NRML, etc.
+      trade-exchange: "NSE"                 # Ex: NSE, BSE, etc.
 
 zerodha:
   account:

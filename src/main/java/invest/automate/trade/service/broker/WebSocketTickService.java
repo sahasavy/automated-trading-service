@@ -22,7 +22,7 @@ import static java.util.Objects.nonNull;
 public class WebSocketTickService {
 
     private final ZerodhaKiteService kiteService;
-    private final TradingConfig config;
+    private final TradingConfig tradingConfig;
     private final ZerodhaConfig zerodhaConfig;
 
     private KiteTicker kiteTicker;
@@ -38,7 +38,7 @@ public class WebSocketTickService {
         String accessToken = kiteConnect.getAccessToken();
         kiteTicker = new KiteTicker(accessToken, apiKey);
 
-        ArrayList<Long> instrumentTokens = new ArrayList<>(config.getInstrumentTokens());
+        ArrayList<Long> instrumentTokens = new ArrayList<>(tradingConfig.getInstrumentTokens());
 
         kiteTicker.setOnConnectedListener(handleOnConnected(instrumentTokens));
         kiteTicker.setOnDisconnectedListener(handleOnDisconnected());

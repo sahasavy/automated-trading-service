@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 public class PaperTradeService {
 
-    private final IndicatorConfig config;
+    private final IndicatorConfig indicatorConfig;
     private final WebSocketTickService wsService;
     private final SeriesManagerService seriesManager;
     private final SignalCompositionService signalCompositionService;
@@ -40,7 +40,7 @@ public class PaperTradeService {
             for (Tick tick : ticks) {
                 seriesManager.onTicks(List.of(tick));
 
-                for (int barDuration : config.getBarDurations()) {
+                for (int barDuration : indicatorConfig.getBarDurations()) {
                     BarSeries series = seriesManager.getSeries(tick.getInstrumentToken(), barDuration);
                     SignalCompositionService.Signal signal = signalCompositionService.compositeSignal(series);
 

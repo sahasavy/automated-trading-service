@@ -3,8 +3,9 @@ package invest.automate.trade.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerodhatech.models.Tick;
-import invest.automate.trade.config.TradingConfig;
+import invest.automate.trade.config.BacktestConfig;
 import invest.automate.trade.config.IndicatorConfig;
+import invest.automate.trade.model.requests.BacktestRequest;
 import invest.automate.trade.service.indicator.IndicatorService;
 import invest.automate.trade.service.ml.MlModelService;
 import lombok.RequiredArgsConstructor;
@@ -20,16 +21,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BacktestService {
 
-    private final TradingConfig config;
+    private final BacktestConfig backtestConfig;
     private final IndicatorConfig indicatorConfig;
     private final SeriesManagerService seriesManager;
     private final IndicatorService indicatorService;
     private final MlModelService mlModelService;
 
-    public BacktestResult runBacktest(Object request) {
+    public BacktestResult runBacktest(BacktestRequest request) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            File jsonFile = new File(config.getHistoricFilePath());
+            File jsonFile = new File(backtestConfig.getHistoricFilePath());
             List<Tick> ticks = mapper.readValue(jsonFile, new TypeReference<>() {
             });
             int trainLimit = ticks.size() * 2 / 3;
