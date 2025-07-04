@@ -17,15 +17,15 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class ZerodhaKiteService {
 
-    private final ZerodhaConfig config;
+    private final ZerodhaConfig zerodhaConfig;
 
     @Getter
     private KiteConnect kiteConnect;
 
     private void initializeKiteConnect() {
         try {
-            kiteConnect = new KiteConnect(config.getKiteApiKey(), true);
-            kiteConnect.setUserId(config.getAccountUserId());
+            kiteConnect = new KiteConnect(zerodhaConfig.getKiteApiKey(), true);
+            kiteConnect.setUserId(zerodhaConfig.getAccountUserId());
 
             //TODO - Interactive login required to generate requestToken and accessToken:
             String url = kiteConnect.getLoginURL();
@@ -57,13 +57,13 @@ public class ZerodhaKiteService {
      */
     private void setTokens() {
         try {
-            String accessToken = config.getKiteAccessToken();
-            String publicToken = config.getKitePublicToken();
+            String accessToken = zerodhaConfig.getKiteAccessToken();
+            String publicToken = zerodhaConfig.getKitePublicToken();
 
             if (StringUtils.isBlank(accessToken)) {
                 log.info("Login for the 1st time during the day");
 
-                User user = kiteConnect.generateSession(config.getKiteRequestToken(), config.getKiteApiSecret());
+                User user = kiteConnect.generateSession(zerodhaConfig.getKiteRequestToken(), zerodhaConfig.getKiteApiSecret());
 
                 accessToken = user.accessToken;
                 publicToken = user.publicToken;

@@ -24,7 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SeriesManagerService {
 
-    private final IndicatorConfig config;
+    private final IndicatorConfig indicatorConfig;
 
     // Map: instrumentToken -> Map<durationSeconds, BarSeries>
     private final Map<Long, Map<Integer, BarSeries>> allSeries = new HashMap<>();
@@ -38,7 +38,7 @@ public class SeriesManagerService {
                     tick.getTickTimestamp().toInstant() : Instant.now();
             Instant endTime = tickTimestamp.atZone(ZoneId.systemDefault()).toInstant();
 
-            for (int seconds : config.getBarDurations()) {
+            for (int seconds : indicatorConfig.getBarDurations()) {
                 allSeries.computeIfAbsent(token, k -> new HashMap<>())
                         .computeIfAbsent(seconds, s ->
                                 new BaseBarSeriesBuilder().withName(token + "_" + seconds + "s").build());

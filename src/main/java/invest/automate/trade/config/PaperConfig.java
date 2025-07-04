@@ -4,13 +4,11 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
-
 @Configuration
-@ConfigurationProperties(prefix = "trading")
+@ConfigurationProperties(prefix = "trading.profile.paper")
 @Data
-public class TradingConfig {
+public class PaperConfig {
 
-    private ArrayList<Long> instrumentTokens;      // e.g. [256265, 738561]
+    private boolean paperTrade = true;        // true for paper trading, false for live
 
 }
