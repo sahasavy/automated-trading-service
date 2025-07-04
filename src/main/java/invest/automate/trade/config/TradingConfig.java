@@ -1,4 +1,4 @@
-package invest.automate.trading.config;
+package invest.automate.trade.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

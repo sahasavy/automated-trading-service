@@ -1,4 +1,4 @@
-package invest.automate.trading.service;
+package invest.automate.trade.service;
 
 import com.zerodhatech.models.Tick;
 import com.zerodhatech.ticker.KiteTicker;

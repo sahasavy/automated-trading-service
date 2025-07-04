@@ -1,10 +1,10 @@
-package invest.automate.trading.runner;
+package invest.automate.trade.runner;
 
-import invest.automate.trading.config.TradingConfig;
-import invest.automate.trading.service.BacktestStrategy;
-import invest.automate.trading.service.KiteLoginService;
-import invest.automate.trading.service.MLModelTrainer;
-import invest.automate.trading.service.TickService;
+import invest.automate.trade.config.TradingConfig;
+import invest.automate.trade.service.BacktestStrategy;
+import invest.automate.trade.service.KiteLoginService;
+import invest.automate.trade.service.MLModelTrainer;
+import invest.automate.trade.service.TickService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

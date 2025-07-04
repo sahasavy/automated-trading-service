@@ -1,4 +1,4 @@
-package invest.automate.trading.service;
+package invest.automate.trade.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
