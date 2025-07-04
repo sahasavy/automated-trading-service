@@ -1,7 +1,7 @@
 package invest.automate.trade.service;
 
 import com.zerodhatech.models.Tick;
-import invest.automate.trade.config.TradingConfig;
+import invest.automate.trade.config.IndicatorConfig;
 import invest.automate.trade.service.broker.OrderExecutorService;
 import invest.automate.trade.service.broker.WebSocketTickService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 public class PaperTradeService {
 
-    private final TradingConfig config;
+    private final IndicatorConfig config;
     private final WebSocketTickService wsService;
     private final SeriesManagerService seriesManager;
     private final SignalCompositionService signalCompositionService;

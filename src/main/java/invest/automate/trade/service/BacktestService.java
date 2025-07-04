@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerodhatech.models.Tick;
 import invest.automate.trade.config.TradingConfig;
+import invest.automate.trade.config.IndicatorConfig;
 import invest.automate.trade.service.indicator.IndicatorService;
 import invest.automate.trade.service.ml.MlModelService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.List;
 public class BacktestService {
 
     private final TradingConfig config;
+    private final IndicatorConfig indicatorConfig;
     private final SeriesManagerService seriesManager;
     private final IndicatorService indicatorService;
     private final MlModelService mlModelService;
@@ -37,7 +39,7 @@ public class BacktestService {
                 seriesManager.onTicks(List.of(ticks.get(i)));
             }
             BarSeries barSeries = seriesManager.getSeries(ticks.getFirst().getInstrumentToken(),
-                    config.getBarDurations().getFirst());
+                    indicatorConfig.getBarDurations().getFirst());
             if (barSeries.getBarCount() > 20) {
                 mlModelService.trainModel(barSeries);
             }
@@ -49,7 +51,7 @@ public class BacktestService {
                 Tick tick = ticks.get(limit);
                 seriesManager.onTicks(List.of(tick));
                 BarSeries series = seriesManager.getSeries(tick.getInstrumentToken(),
-                        config.getBarDurations().getFirst());
+                        indicatorConfig.getBarDurations().getFirst());
                 if (series.getBarCount() < 21) {
                     continue;
                 }
