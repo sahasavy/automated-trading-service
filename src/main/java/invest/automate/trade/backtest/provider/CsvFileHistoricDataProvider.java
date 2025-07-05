@@ -1,4 +1,4 @@
-package invest.automate.trade.backtest;
+package invest.automate.trade.backtest.provider;
 
 import com.zerodhatech.models.Tick;
 import invest.automate.trade.config.BacktestConfig;
@@ -27,10 +27,10 @@ public class CsvFileHistoricDataProvider implements HistoricDataProvider {
                 String[] fields = line.split(",");
 
                 Tick tick = new Tick();
-                tick.instrumentToken = Long.parseLong(fields[0]);
-                tick.lastTradedPrice = Double.parseDouble(fields[1]);
-                tick.lastTradedQuantity = Double.parseDouble(fields[2]);
-                // TODO - Add timestamp or other fields as per your CSV structure\
+                tick.setInstrumentToken(Long.parseLong(fields[0]));
+                tick.setLastTradedPrice(Double.parseDouble(fields[1]));
+                tick.setLastTradedQuantity(Double.parseDouble(fields[2]));
+                // TODO - Add timestamp or other fields as per your CSV structure
 
                 ticks.add(tick);
             }

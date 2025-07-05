@@ -1,4 +1,4 @@
-package invest.automate.trade.backtest;
+package invest.automate.trade.backtest.provider;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +19,7 @@ public class JsonFileHistoricDataProvider implements HistoricDataProvider {
     @Override
     public List<Tick> loadHistoricTicks() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(new File(backtestConfig.getJsonPath()), new TypeReference<List<Tick>>() {
+        return mapper.readValue(new File(backtestConfig.getJsonPath()), new TypeReference<>() {
         });
     }
 }
