@@ -1,6 +1,10 @@
 package invest.automate.trade.backtest;
 
 import com.zerodhatech.models.Tick;
+import invest.automate.trade.backtest.provider.ApiHistoricDataProvider;
+import invest.automate.trade.backtest.provider.CsvFileHistoricDataProvider;
+import invest.automate.trade.backtest.provider.HistoricDataProvider;
+import invest.automate.trade.backtest.provider.JsonFileHistoricDataProvider;
 import invest.automate.trade.config.BacktestConfig;
 import invest.automate.trade.config.IndicatorConfig;
 import invest.automate.trade.service.SeriesManagerService;

@@ -1,4 +1,4 @@
-package invest.automate.trade.backtest;
+package invest.automate.trade.backtest.provider;
 
 import com.zerodhatech.models.Tick;
 
