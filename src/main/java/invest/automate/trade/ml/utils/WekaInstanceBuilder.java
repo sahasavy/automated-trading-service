@@ -28,7 +28,7 @@ public class WekaInstanceBuilder {
             Map<String, Double> indicators,
             List<String> classLabels // Pass null for prediction
     ) {
-        List<Attribute> attributes = new ArrayList<>();
+        ArrayList<Attribute> attributes = new ArrayList<>();
 
         // --- Basic bar features
         attributes.add(new Attribute("open"));
@@ -56,7 +56,7 @@ public class WekaInstanceBuilder {
         }
 
         // Build Instances definition
-        Instances dataset = new Instances("TradeFeatures", (ArrayList<Attribute>) attributes, 0);
+        Instances dataset = new Instances("TradeFeatures", attributes, 0);
         if (classLabels != null && !classLabels.isEmpty()) {
             dataset.setClassIndex(attributes.size() - 1);
         }

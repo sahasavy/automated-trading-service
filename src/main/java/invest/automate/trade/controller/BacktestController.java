@@ -14,8 +14,8 @@ public class BacktestController {
     private final BacktestService backtestService;
 
     @PostMapping("/start")
-    public ResponseEntity<?> runBacktest(@RequestBody(required = false) BacktestRequest request) {
-        var result = backtestService.runBacktest();
+    public ResponseEntity<?> runBacktest(@RequestBody(required = false) BacktestRequest request) throws Exception {
+        BacktestService.BacktestResult result = backtestService.runBacktest();
         return ResponseEntity.ok(result);
     }
 }

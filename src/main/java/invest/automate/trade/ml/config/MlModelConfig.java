@@ -1,6 +1,7 @@
 package invest.automate.trade.ml.config;
 
 import invest.automate.trade.ml.model.*;
+import invest.automate.trade.ml.model.impl.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
