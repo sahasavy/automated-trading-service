@@ -1,5 +1,6 @@
-package invest.automate.trade.ml.model;
+package invest.automate.trade.ml.model.impl;
 
+import invest.automate.trade.ml.model.TradingMlModel;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.core.Instance;
 import weka.core.Instances;

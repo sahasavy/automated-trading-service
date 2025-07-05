@@ -1,113 +1,154 @@
 package invest.automate.trade.backtest;
 
 import com.zerodhatech.models.Tick;
-import invest.automate.trade.backtest.provider.ApiHistoricDataProvider;
-import invest.automate.trade.backtest.provider.CsvFileHistoricDataProvider;
-import invest.automate.trade.backtest.provider.HistoricDataProvider;
-import invest.automate.trade.backtest.provider.JsonFileHistoricDataProvider;
 import invest.automate.trade.config.BacktestConfig;
 import invest.automate.trade.config.IndicatorConfig;
-import invest.automate.trade.service.SeriesManagerService;
-import invest.automate.trade.service.indicator.IndicatorService;
+import invest.automate.trade.indicator.IndicatorRegistryService;
 import invest.automate.trade.ml.MlModelService;
-import lombok.RequiredArgsConstructor;
+import invest.automate.trade.ml.utils.WekaInstanceBuilder;
+import invest.automate.trade.service.SeriesManagerService;
+import invest.automate.trade.service.SignalCompositionService;
+import invest.automate.trade.backtest.provider.HistoricDataProvider;
+import invest.automate.trade.backtest.provider.JsonFileHistoricDataProvider;
+import invest.automate.trade.backtest.provider.CsvFileHistoricDataProvider;
+import invest.automate.trade.backtest.provider.ApiHistoricDataProvider;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.ta4j.core.Bar;
 import org.ta4j.core.BarSeries;
+import weka.core.Instance;
+import weka.core.Instances;
 
-import java.util.List;
+import java.util.*;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BacktestService {
+
+    private final BacktestConfig backtestConfig;
+    private final IndicatorConfig indicatorConfig;
+
+    private final IndicatorRegistryService indicatorRegistryService;
+    private final MlModelService mlModelService;
+    private final SignalCompositionService signalCompositionService;
+    private final SeriesManagerService seriesManagerService;
 
     private final JsonFileHistoricDataProvider jsonProvider;
     private final CsvFileHistoricDataProvider csvProvider;
     private final ApiHistoricDataProvider apiProvider;
 
-    private final BacktestConfig backtestConfig;
-    private final IndicatorConfig indicatorConfig;
-
-    private final SeriesManagerService seriesManagerService;
-    private final IndicatorService indicatorService;
-    private final MlModelService mlModelService;
-
-    public BacktestResult runBacktest() {
-        try {
-            HistoricDataProvider historicDataProvider = switch (backtestConfig.getProvider().toLowerCase()) {
-                case "json" -> jsonProvider;
-                case "csv" -> csvProvider;
-                case "api" -> apiProvider;
-                default -> throw new IllegalStateException("Unexpected Provider value: " +
-                        backtestConfig.getProvider().toLowerCase());
-            };
-
-            List<Tick> ticks = historicDataProvider.loadHistoricTicks();
-            int trainLimit = ticks.size() * 2 / 3;
-
-            // 1. TRAIN ML model on first 2/3 of data
-            for (int i = 0; i < trainLimit; i++) {
-                seriesManagerService.onTicks(List.of(ticks.get(i)));
-            }
-            BarSeries barSeries = seriesManagerService.getSeries(ticks.getFirst().getInstrumentToken(),
-                    indicatorConfig.getBarDurations().getFirst());
-            if (barSeries.getBarCount() > 20) {
-                mlModelService.trainModel(barSeries);
-            }
-
-            // 2. TEST signals + ML prediction on remaining 1/3 data
-            int buySignals = 0, mlUp = 0;
-            double pnl = 0;
-            for (int limit = trainLimit; limit < ticks.size(); limit++) {
-                Tick tick = ticks.get(limit);
-                seriesManagerService.onTicks(List.of(tick));
-                BarSeries series = seriesManagerService.getSeries(tick.getInstrumentToken(),
-                        indicatorConfig.getBarDurations().getFirst());
-                if (series.getBarCount() < 21) {
-                    continue;
-                }
-
-                IndicatorService.Signal indicatorSignal = indicatorService.evaluateEmaCrossover(series);
-                String mlSignal = "NONE";
-                if (mlModelService != null && barSeries.getBarCount() > 15) {
-                    mlSignal = mlModelService.predict(series);
-                }
-
-                if (indicatorSignal == IndicatorService.Signal.BUY) {
-                    buySignals++;
-                }
-
-                if ("UP".equals(mlSignal)) {
-                    mlUp++;
-                }
-
-                // Example: count as correct if ML/indicator says "UP" and next tick price goes up
-                if (limit + 1 < ticks.size() && ("UP".equals(mlSignal) ||
-                        indicatorSignal == IndicatorService.Signal.BUY)) {
-                    double cur = tick.getLastTradedPrice();
-                    double next = ticks.get(limit + 1).getLastTradedPrice();
-                    pnl += (next - cur);
-                }
-            }
-            String summary = "Backtest: INDICATOR Buys=" + buySignals + ", ML UPs=" + mlUp + ", Simulated P&L=" + pnl;
-            log.info(summary);
-            return new BacktestResult(summary);
-        } catch (Exception e) {
-            log.error("Backtest error: {}", e.getMessage(), e);
-            return new BacktestResult("Backtest failed: " + e.getMessage());
-        }
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class TradeLog {
+        private int barIndex;
+        private String datetime;
+        private String side;
+        private double price;
+        private double pnlAfterTrade;
     }
 
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class BacktestResult {
-        private final String summary;
+        private String summary;
+        private int trades;
+        private double totalPnL;
+        private double winRate;
+        private List<TradeLog> tradeLogs;
+    }
 
-        public BacktestResult(String summary) {
-            this.summary = summary;
+    public BacktestResult runBacktest() throws Exception {
+        HistoricDataProvider historicDataProvider = switch (backtestConfig.getProvider().toLowerCase()) {
+            case "json" -> jsonProvider;
+            case "csv" -> csvProvider;
+            case "api" -> apiProvider;
+            default -> throw new IllegalStateException("Unexpected Provider value: " +
+                    backtestConfig.getProvider().toLowerCase());
+        };
+
+        List<Tick> ticks = historicDataProvider.loadHistoricTicks();
+        if (ticks == null || ticks.isEmpty()) {
+            log.warn("No historic ticks loaded!");
+            return new BacktestResult("No ticks loaded.", 0, 0, 0,
+                    Collections.emptyList());
         }
 
-        public String getSummary() {
-            return summary;
+        // ---- Use SeriesManagerService to build all bar series ----
+        seriesManagerService.onTicks(ticks);
+
+        // For simplicity, backtest only on the first configured instrument and duration:
+        long mainToken = ticks.getFirst().getInstrumentToken();
+        int mainDuration = indicatorConfig.getBarDurations().getFirst();
+
+        BarSeries series = seriesManagerService.getSeries(mainToken, mainDuration);
+
+        if (series == null || series.getBarCount() < 20) {
+            log.warn("Bar series too short for backtest.");
+            return new BacktestResult("Bar series too short.", 0, 0, 0,
+                    Collections.emptyList());
         }
+
+        // ---- ML training as before ----
+        List<String> classLabels = List.of("UP", "DOWN", "NONE");
+        List<Instance> trainingInstances = new ArrayList<>();
+        for (int i = 1; i < series.getBarCount() / 2; i++) {
+            Bar bar = series.getBar(i);
+            Map<String, Double> indicators = indicatorRegistryService.getAllIndicatorValues(series, i);
+            var pair = WekaInstanceBuilder.buildInstance(null, bar, indicators, classLabels);
+            Instance inst = pair.second;
+            double nextClose = series.getBar(i + 1).getClosePrice().doubleValue();
+            double thisClose = bar.getClosePrice().doubleValue();
+            inst.setClassValue(nextClose > thisClose ? "UP" : "DOWN");
+            trainingInstances.add(inst);
+        }
+        if (!trainingInstances.isEmpty()) {
+            Instances trainingSet = new Instances(trainingInstances.getFirst().dataset());
+            trainingSet.addAll(trainingInstances);
+            mlModelService.trainAll(trainingSet);
+        }
+
+        // ---- Backtest loop ----
+        boolean holding = false;
+        String lastSide = null;
+        double entryPrice = 0;
+        int winTrades = 0;
+        int totalTrades = 0;
+        double totalPnL = 0;
+        List<TradeLog> tradeLogs = new ArrayList<>();
+
+        for (int i = series.getBarCount() / 2; i < series.getBarCount() - 1; i++) {
+            Bar bar = series.getBar(i);
+            Map<String, Double> indicators = indicatorRegistryService.getAllIndicatorValues(series, i);
+            var pair = WekaInstanceBuilder.buildInstance(null, bar, indicators, null);
+            Instance inst = pair.second;
+
+            SignalCompositionService.Signal signal = signalCompositionService.composeSignal(series, i, inst);
+
+            if (!holding && signal == SignalCompositionService.Signal.BUY) {
+                holding = true;
+                lastSide = "BUY";
+                entryPrice = bar.getClosePrice().doubleValue();
+                tradeLogs.add(new TradeLog(i, bar.getEndTime().toString(), "BUY", entryPrice, totalPnL));
+                totalTrades++;
+            } else if (holding && signal == SignalCompositionService.Signal.SELL) {
+                holding = false;
+                double exitPrice = bar.getClosePrice().doubleValue();
+                double tradePnL = exitPrice - entryPrice;
+                totalPnL += tradePnL;
+                boolean win = tradePnL > 0;
+                if (win) winTrades++;
+                tradeLogs.add(new TradeLog(i, bar.getEndTime().toString(), "SELL", exitPrice, totalPnL));
+                totalTrades++;
+            }
+        }
+        double winRate = totalTrades > 0 ? (100.0 * winTrades / totalTrades) : 0;
+        String summary = String.format("Backtest complete: Trades=%d, WinRate=%.2f%%, TotalPnL=%.2f",
+                totalTrades, winRate, totalPnL);
+
+        return new BacktestResult(summary, totalTrades, totalPnL, winRate, tradeLogs);
     }
 }
