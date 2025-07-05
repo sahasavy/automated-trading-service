@@ -9,7 +9,7 @@ import invest.automate.trade.config.BacktestConfig;
 import invest.automate.trade.config.IndicatorConfig;
 import invest.automate.trade.service.SeriesManagerService;
 import invest.automate.trade.service.indicator.IndicatorService;
-import invest.automate.trade.service.ml.MlModelService;
+import invest.automate.trade.ml.MlModelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
